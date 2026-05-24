@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NextScraper Pro — Téléchargeur de sites Web</title>
+  <title>NextScraper Pro — Website Downloader</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
@@ -21,10 +21,13 @@
           <div class="logo-sub">Website Downloader — Next.js / React / SPA</div>
         </div>
       </div>
-      <div class="header-badges">
-        <span class="badge">Playwright</span>
-        <span class="badge">Axios+Cheerio</span>
-        <span class="badge">ZIP Export</span>
+      <div class="header-right">
+        <div class="header-badges">
+          <span class="badge">Playwright</span>
+          <span class="badge">Axios+Cheerio</span>
+          <span class="badge">ZIP Export</span>
+        </div>
+        <button class="lang-btn" id="langBtn" title="Switch language">🌐 EN</button>
       </div>
     </div>
   </header>
@@ -34,43 +37,44 @@
     <section class="panel config-panel" id="configPanel">
       <div class="panel-title">
         <span class="panel-icon">⚙</span>
-        Configuration du scraping
+        <span data-i18n="configTitle">Configuration du scraping</span>
       </div>
 
       <div class="form-group url-group">
-        <label for="urlInput">URL cible</label>
+        <label for="urlInput" data-i18n="urlLabel">URL cible</label>
         <div class="url-wrapper">
           <span class="url-prefix">https://</span>
           <input
             type="text"
             id="urlInput"
+            data-i18n-placeholder="urlPlaceholder"
             placeholder="example.com ou next-app.vercel.app"
             autocomplete="off"
             spellcheck="false"
           />
-          <button class="paste-btn" id="pasteBtn" title="Coller">⎘</button>
+          <button class="paste-btn" id="pasteBtn" data-i18n-title="paste" title="Coller">⎘</button>
         </div>
       </div>
 
       <div class="form-row">
         <!-- Mode -->
         <div class="form-group">
-          <label>Mode de scraping</label>
+          <label data-i18n="modeLabel">Mode de scraping</label>
           <div class="mode-selector">
             <label class="mode-option" data-mode="fast">
               <input type="radio" name="mode" value="fast" checked />
               <div class="mode-card">
                 <div class="mode-icon">⚡</div>
-                <div class="mode-label">Rapide</div>
-                <div class="mode-desc">Axios + Cheerio<br/>Sites statiques/SSR</div>
+                <div class="mode-label" data-i18n="modeFastLabel">Rapide</div>
+                <div class="mode-desc" data-i18n="modeFastDesc">Axios + Cheerio<br/>Sites statiques/SSR</div>
               </div>
             </label>
             <label class="mode-option" data-mode="full">
               <input type="radio" name="mode" value="full" />
               <div class="mode-card">
                 <div class="mode-icon">🎭</div>
-                <div class="mode-label">Complet</div>
-                <div class="mode-desc">Playwright headless<br/>Next.js / SPA / React</div>
+                <div class="mode-label" data-i18n="modeFullLabel">Complet</div>
+                <div class="mode-desc" data-i18n="modeFullDesc">Playwright headless<br/>Next.js / SPA / React</div>
               </div>
             </label>
           </div>
@@ -78,11 +82,11 @@
 
         <!-- Depth -->
         <div class="form-group">
-          <label for="depth">Profondeur de crawl <span class="val-display" id="depthVal">3</span></label>
+          <label for="depth"><span data-i18n="depthLabel">Profondeur de crawl</span> <span class="val-display" id="depthVal">3</span></label>
           <input type="range" id="depth" min="1" max="10" value="3" class="slider" />
           <div class="slider-labels">
-            <span>1 (page seule)</span>
-            <span>10 (tout le site)</span>
+            <span data-i18n="depthMin">1 (page seule)</span>
+            <span data-i18n="depthMax">10 (tout le site)</span>
           </div>
         </div>
       </div>
@@ -90,14 +94,14 @@
       <div class="form-row">
         <!-- Delay -->
         <div class="form-group">
-          <label for="delay">Délai entre requêtes <span class="val-display" id="delayVal">500ms</span></label>
+          <label for="delay"><span data-i18n="delayLabel">Délai entre requêtes</span> <span class="val-display" id="delayVal">500ms</span></label>
           <input type="range" id="delay" min="0" max="3000" step="100" value="500" class="slider" />
           <div class="slider-labels"><span>0ms</span><span>3s</span></div>
         </div>
 
         <!-- Timeout -->
         <div class="form-group">
-          <label for="timeout">Timeout par page <span class="val-display" id="timeoutVal">30s</span></label>
+          <label for="timeout"><span data-i18n="timeoutLabel">Timeout par page</span> <span class="val-display" id="timeoutVal">30s</span></label>
           <input type="range" id="timeout" min="5000" max="120000" step="5000" value="30000" class="slider" />
           <div class="slider-labels"><span>5s</span><span>2min</span></div>
         </div>
@@ -113,8 +117,8 @@
             </div>
           </div>
           <div>
-            <div class="toggle-name">Mode Agressif</div>
-            <div class="toggle-desc">Concurrence x5, screenshot (mode Complet), ignore les délais partiellement</div>
+            <div class="toggle-name" data-i18n="aggressiveName">Mode Agressif</div>
+            <div class="toggle-desc" data-i18n="aggressiveDesc">Concurrence x5, screenshot (mode Complet), ignore les délais partiellement</div>
           </div>
         </label>
       </div>
@@ -122,7 +126,7 @@
       <div class="actions">
         <button class="btn-start" id="startBtn">
           <span class="btn-icon">▶</span>
-          Lancer le scraping
+          <span data-i18n="startBtn">Lancer le scraping</span>
         </button>
       </div>
     </section>
@@ -131,35 +135,35 @@
     <section class="panel progress-panel hidden" id="progressPanel">
       <div class="panel-title">
         <span class="panel-icon">📡</span>
-        Progression en temps réel
+        <span data-i18n="progressTitle">Progression en temps réel</span>
         <div class="job-id-badge" id="jobIdBadge"></div>
-        <button class="cancel-btn" id="cancelBtn">✕ Annuler</button>
+        <button class="cancel-btn" id="cancelBtn" data-i18n="cancelBtn">✕ Annuler</button>
       </div>
 
       <div class="progress-bar-outer">
         <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
-        <div class="progress-label" id="progressLabel">Initialisation...</div>
+        <div class="progress-label" id="progressLabel" data-i18n="initializing">Initialisation...</div>
       </div>
 
       <div class="stats-row">
         <div class="stat-box">
-          <div class="stat-label">STATUT</div>
-          <div class="stat-value" id="statStatus">En cours</div>
+          <div class="stat-label" data-i18n="statStatus">STATUT</div>
+          <div class="stat-value" id="statStatus" data-i18n="inProgress">En cours</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">MODE</div>
+          <div class="stat-label" data-i18n="statMode">MODE</div>
           <div class="stat-value" id="statMode">—</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">PROFONDEUR</div>
+          <div class="stat-label" data-i18n="statDepth">PROFONDEUR</div>
           <div class="stat-value" id="statDepth">—</div>
         </div>
       </div>
 
       <div class="log-panel" id="logPanel">
         <div class="log-header">
-          <span>Terminal</span>
-          <button class="log-clear-btn" id="clearLogBtn">Vider</button>
+          <span data-i18n="terminal">Terminal</span>
+          <button class="log-clear-btn" id="clearLogBtn" data-i18n="clearLogs">Vider</button>
         </div>
         <div class="log-body" id="logBody"></div>
       </div>
@@ -169,14 +173,17 @@
     <section class="panel result-panel hidden" id="resultPanel">
       <div class="result-inner">
         <div class="result-icon">✓</div>
-        <div class="result-title">Scraping terminé !</div>
+        <div class="result-title" data-i18n="resultTitle">Scraping terminé !</div>
         <div class="result-size" id="resultSize"></div>
         <div class="result-actions">
           <button class="btn-download" id="downloadBtn">
-            ⬇ Télécharger le ZIP
+            ⬇ <span data-i18n="downloadBtn">Télécharger le ZIP</span>
+          </button>
+          <button class="btn-logs" id="showLogsResultBtn">
+            📋 <span data-i18n="viewLogs">Voir les logs</span>
           </button>
           <button class="btn-new" id="newJobBtn">
-            ↺ Nouveau scraping
+            ↺ <span data-i18n="newJob">Nouveau scraping</span>
           </button>
         </div>
       </div>
@@ -186,20 +193,36 @@
     <section class="panel error-panel hidden" id="errorPanel">
       <div class="error-inner">
         <div class="error-icon">✗</div>
-        <div class="error-title">Erreur</div>
+        <div class="error-title" data-i18n="errorTitle">Erreur</div>
         <div class="error-msg" id="errorMsg"></div>
-        <button class="btn-new" id="retryBtn">↺ Réessayer</button>
+        <div class="result-actions">
+          <button class="btn-logs" id="showLogsErrorBtn">
+            📋 <span data-i18n="viewLogs">Voir les logs</span>
+          </button>
+          <button class="btn-new" id="retryBtn">↺ <span data-i18n="retry">Réessayer</span></button>
+        </div>
       </div>
     </section>
+
+    <!-- LOG MODAL (shared, shown from result/error panels) -->
+    <div class="log-modal-overlay hidden" id="logModalOverlay">
+      <div class="log-modal">
+        <div class="log-modal-header">
+          <span data-i18n="terminal">Terminal</span>
+          <button class="log-modal-close" id="logModalClose">✕</button>
+        </div>
+        <div class="log-modal-body" id="logModalBody"></div>
+      </div>
+    </div>
   </main>
 
   <!-- INFO FOOTER -->
   <footer>
     <div class="footer-inner">
       <div class="footer-tips">
-        <div class="tip"><span class="tip-icon">💡</span> Pour les sites <strong>Next.js</strong>, utilisez le mode <strong>Complet (Playwright)</strong> afin d'exécuter le JavaScript et récupérer le HTML hydraté.</div>
-        <div class="tip"><span class="tip-icon">⚡</span> Le mode <strong>Rapide</strong> convient aux sites statiques, WordPress, et sites SSR simples.</div>
-        <div class="tip"><span class="tip-icon">📁</span> Le ZIP contient les HTML, CSS, JS, images, polices, et les fichiers <code>_next/static</code>.</div>
+        <div class="tip"><span class="tip-icon">💡</span> <span data-i18n="tip1"></span></div>
+        <div class="tip"><span class="tip-icon">⚡</span> <span data-i18n="tip2"></span></div>
+        <div class="tip"><span class="tip-icon">📁</span> <span data-i18n="tip3"></span></div>
       </div>
       <div class="footer-credit">NextScraper Pro — by Xhris Dior</div>
     </div>

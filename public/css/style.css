@@ -95,10 +95,35 @@ header {
   margin-top: 2px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .header-badges {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.lang-btn {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  color: var(--accent);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.lang-btn:hover {
+  background: var(--accent);
+  color: var(--bg);
 }
 
 .badge {
@@ -657,6 +682,78 @@ label {
   transition: all 0.2s;
 }
 .btn-new:hover { border-color: var(--text-dim); color: var(--text); }
+
+.btn-logs {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-logs:hover { background: var(--accent); color: var(--bg); }
+
+/* ─── Log Modal ──────────────────────────────────────────────────── */
+.log-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+}
+
+.log-modal {
+  background: var(--bg1);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 820px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.log-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+
+.log-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 2px;
+  transition: color 0.15s;
+}
+.log-modal-close:hover { color: var(--text); }
+
+.log-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  line-height: 1.7;
+}
 
 /* ─── Error Panel ────────────────────────────────────────────────── */
 .error-panel::before { background: linear-gradient(to right, var(--error), transparent); }
