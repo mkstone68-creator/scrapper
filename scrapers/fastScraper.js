@@ -6,8 +6,10 @@ const pLimit = require('p-limit');
 const {
   resolveUrl, isSameOrigin, urlToFilePath, guessExt,
   rewriteHtml, rewriteCss, extractNextJsAssets, extractNextData,
-  buildInternalPattern, sleep, normalizeUrl
+  buildInternalPattern, sleep, normalizeUrl, fetchSitemapUrls,
 } = require('../utils/helpers');
+
+const MAX_PAGES = 5000;
 
 const DEFAULT_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
@@ -15,14 +17,14 @@ const DEFAULT_HEADERS = {
   'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
   'Accept-Encoding': 'gzip, deflate, br',
   'Cache-Control': 'no-cache',
-  'Pragma': 'no-cache',
 };
 
 class FastScraper {
   constructor(config) {
     this.url = config.url;
-    this.depth = parseInt(config.depth) || 2;
-    this.delay = parseInt(config.delay) || 500;
+    this.depth = parseInt(config.depth) || 3;
+    this.maxDepth = this.depth >= 10 ? Infinity : this.depth;
+    this.delay = parseInt(config.delay) || 300;
     this.timeout = parseInt(config.timeout) || 30000;
     this.aggressive = config.aggressive === true || config.aggressive === 'true';
     this.jobDir = config.jobDir;
@@ -31,7 +33,8 @@ class FastScraper {
     this.isCancelled = config.isCancelled || (() => false);
 
     this.baseUrl = this.url;
-    this.visited = new Set();
+    this.visited = new Set();  // actually scraped
+    this.queued = new Set();   // added to queue (dedup guard)
     this.queue = [];
     this.assets = new Set();
     this.failedUrls = new Set();
@@ -39,7 +42,7 @@ class FastScraper {
     this.processedPages = 0;
     this.apiCalls = [];
 
-    this.limit = pLimit(this.aggressive ? 5 : 3);
+    this.limit = pLimit(this.aggressive ? 6 : 3);
     this.http = axios.create({
       timeout: this.timeout,
       headers: DEFAULT_HEADERS,
@@ -49,27 +52,61 @@ class FastScraper {
   }
 
   async run() {
-    this.logger.info(`🔍 Mode Rapide (Axios+Cheerio) — Profondeur: ${this.depth}`);
-    
-    // Start with root
-    this.queue.push({ url: this.baseUrl, depth: 0 });
+    this.logger.info(`🔍 Mode Rapide (Axios+Cheerio) — Profondeur: ${this.maxDepth === Infinity ? '∞' : this.maxDepth}`);
 
-    while (this.queue.length > 0 && !this.isCancelled()) {
-      const batch = this.queue.splice(0, this.aggressive ? 5 : 3);
+    // Seed queue with start URL
+    const startUrl = normalizeUrl(this.baseUrl);
+    this.queued.add(startUrl);
+    this.queue.push({ url: startUrl, depth: 0 });
+
+    // Discover all URLs from sitemap before crawling
+    await this.discoverFromSitemap();
+
+    // Crawl loop
+    while (this.queue.length > 0 && !this.isCancelled() && this.visited.size < MAX_PAGES) {
+      const concurrency = this.aggressive ? 6 : 3;
+      const batch = this.queue.splice(0, concurrency);
       await Promise.all(batch.map(item => this.limit(() => this.scrapePage(item))));
     }
 
     if (this.isCancelled()) return;
 
-    // Download all collected assets
+    // Retry failed pages once
+    if (this.failedUrls.size > 0) {
+      this.logger.info(`🔄 Retry de ${this.failedUrls.size} pages échouées...`);
+      const retries = [...this.failedUrls];
+      this.failedUrls.clear();
+      await Promise.all(retries.map(url =>
+        this.limit(() => this.scrapePage({ url, depth: 0 }))
+      ));
+    }
+
     this.logger.info(`📥 Téléchargement de ${this.assets.size} ressources...`);
     await this.downloadAssets();
 
-    // Save API calls log
     if (this.apiCalls.length > 0) {
-      const apiLogPath = path.join(this.jobDir, '_api_calls.json');
-      await fs.writeJson(apiLogPath, this.apiCalls, { spaces: 2 });
-      this.logger.info(`🔌 ${this.apiCalls.length} appels API sauvegardés dans _api_calls.json`);
+      await fs.writeJson(path.join(this.jobDir, '_api_calls.json'), this.apiCalls, { spaces: 2 });
+      this.logger.info(`🔌 ${this.apiCalls.length} appels API sauvegardés`);
+    }
+  }
+
+  async discoverFromSitemap() {
+    try {
+      const sitemapUrls = await fetchSitemapUrls(this.baseUrl, this.http);
+      if (sitemapUrls.size === 0) return;
+
+      this.logger.info(`🗺️ Sitemap: ${sitemapUrls.size} URLs découvertes`);
+
+      for (const u of sitemapUrls) {
+        const norm = normalizeUrl(u);
+        if (!this.queued.has(norm) && isSameOrigin(this.baseUrl, norm)) {
+          this.queued.add(norm);
+          this.queue.push({ url: norm, depth: 1 });
+          this.totalPages++;
+        }
+      }
+    } catch (err) {
+      this.logger.warn(`⚠️ Sitemap inaccessible: ${err.message}`);
     }
   }
 
@@ -81,7 +118,7 @@ class FastScraper {
     try {
       if (this.delay > 0) await sleep(this.delay);
 
-      this.logger.info(`📄 [${depth}/${this.depth}] ${url}`);
+      this.logger.info(`📄 [${depth}/${this.maxDepth === Infinity ? '∞' : this.maxDepth}] ${url}`);
       const res = await this.http.get(url, { responseType: 'text' });
 
       if (!res.headers['content-type']?.includes('text/html')) {
@@ -92,23 +129,18 @@ class FastScraper {
       const html = res.data;
       const $ = cheerio.load(html);
 
-      // Save page
       await this.savePage(url, html, $);
 
-      // Extract Next.js data
       const nextData = extractNextData(html);
       if (nextData) {
-        const nextDataPath = path.join(this.jobDir, '_next_data.json');
-        await fs.writeJson(nextDataPath, nextData, { spaces: 2 });
+        await fs.writeJson(path.join(this.jobDir, '_next_data.json'), nextData, { spaces: 2 });
         this.logger.info('📊 __NEXT_DATA__ extrait');
       }
 
-      // Collect assets from this page
       this.collectAssets($, url);
 
-      // Collect internal links for crawling
-      if (depth < this.depth) {
-        this.collectLinks($, url, depth);
+      if (depth < this.maxDepth && this.visited.size < MAX_PAGES) {
+        this.collectLinks($, url, depth, html);
       }
 
       this.processedPages++;
@@ -124,38 +156,20 @@ class FastScraper {
   async savePage(pageUrl, html, $) {
     let filePath = urlToFilePath(pageUrl, this.baseUrl, this.jobDir);
     if (!filePath) return;
-
-    // Rewrite links to local paths
     const rewritten = rewriteHtml(html, pageUrl, this.jobDir, filePath);
-
     await fs.ensureDir(path.dirname(filePath));
     await fs.writeFile(filePath, rewritten, 'utf8');
   }
 
   collectAssets($, pageUrl) {
-    const selectors = {
-      'link[rel="stylesheet"]': 'href',
-      'link[rel="preload"]': 'href',
-      'script[src]': 'src',
-      'img': 'src',
-      'img': 'data-src',
-      'source': 'src',
-      'source': 'srcset',
-      'video': 'src',
-      'audio': 'src',
-    };
-
-    // Standard assets
     $('link[href], script[src], img[src], img[data-src], source[src], video[src], audio[src]').each((_, el) => {
       const el$ = $(el);
       const href = el$.attr('href') || el$.attr('src') || el$.attr('data-src');
       if (!href || href.startsWith('data:') || href.startsWith('#')) return;
-      
       const abs = resolveUrl(pageUrl, href);
       if (abs) this.assets.add(abs);
     });
 
-    // srcset
     $('[srcset]').each((_, el) => {
       const srcset = $(el).attr('srcset') || '';
       srcset.split(',').forEach(entry => {
@@ -167,18 +181,15 @@ class FastScraper {
       });
     });
 
-    // Inline styles
     $('[style]').each((_, el) => {
       const style = $(el).attr('style') || '';
-      const matches = style.matchAll(/url\(['"]?([^'")]+)['"]?\)/gi);
-      for (const m of matches) {
+      for (const m of style.matchAll(/url\(['"]?([^'")]+)['"]?\)/gi)) {
         const abs = resolveUrl(pageUrl, m[1]);
         if (abs) this.assets.add(abs);
       }
     });
 
-    // CSS files (will be parsed during download)
-    $('link[rel="stylesheet"]').each((_, el) => {
+    $('link[rel*="icon"], link[rel="manifest"], link[rel="preload"]').each((_, el) => {
       const href = $(el).attr('href');
       if (href) {
         const abs = resolveUrl(pageUrl, href);
@@ -186,24 +197,10 @@ class FastScraper {
       }
     });
 
-    // Favicon, manifest
-    $('link[rel*="icon"], link[rel="manifest"]').each((_, el) => {
-      const href = $(el).attr('href');
-      if (href) {
-        const abs = resolveUrl(pageUrl, href);
-        if (abs) this.assets.add(abs);
-      }
-    });
-
-    // Next.js chunk detection from inline scripts
     $('script:not([src])').each((_, el) => {
       const content = $(el).html() || '';
-      const nextAssets = extractNextJsAssets(content, pageUrl);
-      nextAssets.forEach(a => this.assets.add(a));
-
-      // Detect API calls in JS
-      const apiMatches = content.matchAll(/fetch\(['"`]([^'"`]+)['"`]/g);
-      for (const m of apiMatches) {
+      extractNextJsAssets(content, pageUrl).forEach(a => this.assets.add(a));
+      for (const m of content.matchAll(/fetch\(['"`]([^'"`]+)['"`]/g)) {
         if (m[1].startsWith('/api/') || m[1].includes('/api/')) {
           this.apiCalls.push({ page: pageUrl, endpoint: m[1] });
         }
@@ -211,19 +208,50 @@ class FastScraper {
     });
   }
 
-  collectLinks($, pageUrl, depth) {
-    $('a[href]').each((_, el) => {
-      const href = $(el).attr('href');
-      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+  collectLinks($, pageUrl, depth, html) {
+    const addLink = (href) => {
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+      try {
+        const abs = resolveUrl(pageUrl, href);
+        if (!abs) return;
+        const norm = normalizeUrl(abs);
+        if (!this.queued.has(norm) && isSameOrigin(this.baseUrl, abs)) {
+          this.queued.add(norm);
+          this.queue.push({ url: norm, depth: depth + 1 });
+          this.totalPages++;
+        }
+      } catch {}
+    };
 
-      const abs = resolveUrl(pageUrl, href);
-      if (!abs) return;
+    // Standard anchor links
+    $('a[href]').each((_, el) => addLink($(el).attr('href')));
 
-      const normalized = normalizeUrl(abs);
-      if (!this.visited.has(normalized) && isSameOrigin(this.baseUrl, abs)) {
-        this.visited.add(normalized);
-        this.queue.push({ url: normalized, depth: depth + 1 });
-        this.totalPages++;
+    // data-href, data-url, data-link attributes
+    $('[data-href],[data-url],[data-link]').each((_, el) => {
+      addLink($(el).attr('data-href') || $(el).attr('data-url') || $(el).attr('data-link'));
+    });
+
+    // Canonical & alternate links in <head>
+    $('link[rel="canonical"],link[rel="alternate"]').each((_, el) => {
+      addLink($(el).attr('href'));
+    });
+
+    // og:url meta
+    const ogUrl = $('meta[property="og:url"]').attr('content');
+    if (ogUrl) addLink(ogUrl);
+
+    // Extract absolute internal URLs from inline script content
+    const origin = new URL(pageUrl).origin;
+    $('script:not([src])').each((_, el) => {
+      const content = $(el).html() || '';
+      // Match quoted path strings like "/some/path" or full URLs
+      const re = /["'`]((?:https?:\/\/[^"'`\s]+|\/[a-zA-Z0-9\-_/]+))["'`]/g;
+      let m;
+      while ((m = re.exec(content)) !== null) {
+        try {
+          const abs = new URL(m[1], origin).href;
+          if (isSameOrigin(this.baseUrl, abs)) addLink(abs);
+        } catch {}
       }
     });
   }
@@ -234,9 +262,7 @@ class FastScraper {
 
     await Promise.all(assets.map(assetUrl => this.limit(async () => {
       if (this.isCancelled()) return;
-
       try {
-        // Skip if already downloaded as a page
         const filePath = urlToFilePath(assetUrl, this.baseUrl, this.jobDir);
         if (!filePath) return;
         if (fs.existsSync(filePath) && fs.statSync(filePath).size > 0) {
@@ -244,7 +270,7 @@ class FastScraper {
           return;
         }
 
-        if (this.delay > 0) await sleep(Math.round(this.delay / 3));
+        if (this.delay > 0) await sleep(Math.round(this.delay / 4));
 
         const res = await this.http.get(assetUrl, {
           responseType: 'arraybuffer',
@@ -254,29 +280,21 @@ class FastScraper {
         const contentType = res.headers['content-type'] || '';
         let data = Buffer.from(res.data);
 
-        // For CSS: rewrite urls inside
         if (contentType.includes('text/css')) {
           let css = data.toString('utf8');
           css = rewriteCss(css, assetUrl, this.jobDir, filePath);
           data = Buffer.from(css, 'utf8');
-
-          // Parse CSS for more assets
-          const urlMatches = css.matchAll(/url\(['"]?([^'")]+)['"]?\)/gi);
-          for (const m of urlMatches) {
+          for (const m of css.matchAll(/url\(['"]?([^'")]+)['"]?\)/gi)) {
             if (!m[1].startsWith('data:')) {
               const abs = resolveUrl(assetUrl, m[1]);
-              if (abs && !this.assets.has(abs)) {
-                this.assets.add(abs);
-              }
+              if (abs && !this.assets.has(abs)) this.assets.add(abs);
             }
           }
         }
 
-        // For JS: extract more Next.js assets
         if (contentType.includes('javascript') || assetUrl.includes('.js')) {
           const jsStr = data.toString('utf8');
-          const moreAssets = extractNextJsAssets(jsStr, assetUrl);
-          moreAssets.forEach(a => {
+          extractNextJsAssets(jsStr, assetUrl).forEach(a => {
             if (!this.assets.has(a)) this.assets.add(a);
           });
         }
@@ -288,7 +306,7 @@ class FastScraper {
         const pct = 70 + Math.round((downloaded / assets.length) * 20);
         this.logger.progress(pct, `Assets: ${downloaded}/${assets.length}`);
 
-      } catch (err) {
+      } catch {
         this.failedUrls.add(assetUrl);
       }
     })));

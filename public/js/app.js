@@ -40,7 +40,7 @@ let currentConfig = null;
 
 // ─── Slider Displays ──────────────────────────────────────────────
 depth.addEventListener('input', () => {
-  depthVal.textContent = depth.value;
+  depthVal.textContent = depth.value >= 10 ? '∞ (tout le site)' : depth.value;
 });
 
 delay.addEventListener('input', () => {
