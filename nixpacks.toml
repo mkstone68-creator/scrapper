@@ -1,8 +1,5 @@
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
-[phases.install]
-cmds = ["npm ci", "npx playwright install chromium --with-deps"]
-
 [start]
 cmd = "node server.js"
