@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NextScraper Pro — Téléchargeur de sites Web</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <div>
+          <div class="logo-name">NextScraper<span class="accent">Pro</span></div>
+          <div class="logo-sub">Website Downloader — Next.js / React / SPA</div>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge">Playwright</span>
+        <span class="badge">Axios+Cheerio</span>
+        <span class="badge">ZIP Export</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- CONFIG PANEL -->
+    <section class="panel config-panel" id="configPanel">
+      <div class="panel-title">
+        <span class="panel-icon">⚙</span>
+        Configuration du scraping
+      </div>
+
+      <div class="form-group url-group">
+        <label for="urlInput">URL cible</label>
+        <div class="url-wrapper">
+          <span class="url-prefix">https://</span>
+          <input
+            type="text"
+            id="urlInput"
+            placeholder="example.com ou next-app.vercel.app"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="paste-btn" id="pasteBtn" title="Coller">⎘</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <!-- Mode -->
+        <div class="form-group">
+          <label>Mode de scraping</label>
+          <div class="mode-selector">
+            <label class="mode-option" data-mode="fast">
+              <input type="radio" name="mode" value="fast" checked />
+              <div class="mode-card">
+                <div class="mode-icon">⚡</div>
+                <div class="mode-label">Rapide</div>
+                <div class="mode-desc">Axios + Cheerio<br/>Sites statiques/SSR</div>
+              </div>
+            </label>
+            <label class="mode-option" data-mode="full">
+              <input type="radio" name="mode" value="full" />
+              <div class="mode-card">
+                <div class="mode-icon">🎭</div>
+                <div class="mode-label">Complet</div>
+                <div class="mode-desc">Playwright headless<br/>Next.js / SPA / React</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Depth -->
+        <div class="form-group">
+          <label for="depth">Profondeur de crawl <span class="val-display" id="depthVal">2</span></label>
+          <input type="range" id="depth" min="1" max="5" value="2" class="slider" />
+          <div class="slider-labels">
+            <span>1 (page seule)</span>
+            <span>5 (crawl max)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <!-- Delay -->
+        <div class="form-group">
+          <label for="delay">Délai entre requêtes <span class="val-display" id="delayVal">500ms</span></label>
+          <input type="range" id="delay" min="0" max="3000" step="100" value="500" class="slider" />
+          <div class="slider-labels"><span>0ms</span><span>3s</span></div>
+        </div>
+
+        <!-- Timeout -->
+        <div class="form-group">
+          <label for="timeout">Timeout par page <span class="val-display" id="timeoutVal">30s</span></label>
+          <input type="range" id="timeout" min="5000" max="120000" step="5000" value="30000" class="slider" />
+          <div class="slider-labels"><span>5s</span><span>2min</span></div>
+        </div>
+      </div>
+
+      <!-- Aggressive mode -->
+      <div class="toggle-row">
+        <label class="toggle-label">
+          <div class="toggle-wrapper">
+            <input type="checkbox" id="aggressive" />
+            <div class="toggle-track">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+          <div>
+            <div class="toggle-name">Mode Agressif</div>
+            <div class="toggle-desc">Concurrence x5, screenshot (mode Complet), ignore les délais partiellement</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="btn-start" id="startBtn">
+          <span class="btn-icon">▶</span>
+          Lancer le scraping
+        </button>
+      </div>
+    </section>
+
+    <!-- PROGRESS PANEL -->
+    <section class="panel progress-panel hidden" id="progressPanel">
+      <div class="panel-title">
+        <span class="panel-icon">📡</span>
+        Progression en temps réel
+        <div class="job-id-badge" id="jobIdBadge"></div>
+        <button class="cancel-btn" id="cancelBtn">✕ Annuler</button>
+      </div>
+
+      <div class="progress-bar-outer">
+        <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+        <div class="progress-label" id="progressLabel">Initialisation...</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">STATUT</div>
+          <div class="stat-value" id="statStatus">En cours</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">MODE</div>
+          <div class="stat-value" id="statMode">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">PROFONDEUR</div>
+          <div class="stat-value" id="statDepth">—</div>
+        </div>
+      </div>
+
+      <div class="log-panel" id="logPanel">
+        <div class="log-header">
+          <span>Terminal</span>
+          <button class="log-clear-btn" id="clearLogBtn">Vider</button>
+        </div>
+        <div class="log-body" id="logBody"></div>
+      </div>
+    </section>
+
+    <!-- RESULT PANEL -->
+    <section class="panel result-panel hidden" id="resultPanel">
+      <div class="result-inner">
+        <div class="result-icon">✓</div>
+        <div class="result-title">Scraping terminé !</div>
+        <div class="result-size" id="resultSize"></div>
+        <div class="result-actions">
+          <button class="btn-download" id="downloadBtn">
+            ⬇ Télécharger le ZIP
+          </button>
+          <button class="btn-new" id="newJobBtn">
+            ↺ Nouveau scraping
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ERROR PANEL -->
+    <section class="panel error-panel hidden" id="errorPanel">
+      <div class="error-inner">
+        <div class="error-icon">✗</div>
+        <div class="error-title">Erreur</div>
+        <div class="error-msg" id="errorMsg"></div>
+        <button class="btn-new" id="retryBtn">↺ Réessayer</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- INFO FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-tips">
+        <div class="tip"><span class="tip-icon">💡</span> Pour les sites <strong>Next.js</strong>, utilisez le mode <strong>Complet (Playwright)</strong> afin d'exécuter le JavaScript et récupérer le HTML hydraté.</div>
+        <div class="tip"><span class="tip-icon">⚡</span> Le mode <strong>Rapide</strong> convient aux sites statiques, WordPress, et sites SSR simples.</div>
+        <div class="tip"><span class="tip-icon">📁</span> Le ZIP contient les HTML, CSS, JS, images, polices, et les fichiers <code>_next/static</code>.</div>
+      </div>
+      <div class="footer-credit">NextScraper Pro — by Xhris Dior</div>
+    </div>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

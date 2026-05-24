@@ -1,0 +1,5 @@
+node_modules/
+jobs/
+downloads/
+*.zip
+.env
