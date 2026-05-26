@@ -1,232 +1,330 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NextScraper Pro — Website Downloader</title>
+  <title>ScrapLink — Turn any link into code</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <div class="noise"></div>
 
   <!-- HEADER -->
-  <header>
+  <header id="siteHeader">
     <div class="header-inner">
       <div class="logo">
-        <span class="logo-icon">⬡</span>
-        <div>
-          <div class="logo-name">NextScraper<span class="accent">Pro</span></div>
-          <div class="logo-sub">Website Downloader — Next.js / React / SPA</div>
-        </div>
+        <span class="logo-bracket">&lt;/&gt;</span>
+        <span class="logo-name">ScrapLink</span>
       </div>
-      <div class="header-right">
-        <div class="header-badges">
-          <span class="badge">Playwright</span>
-          <span class="badge">Axios+Cheerio</span>
-          <span class="badge">ZIP Export</span>
-        </div>
-        <button class="lang-btn" id="langBtn" title="Switch language">🌐 EN</button>
+      <nav class="nav">
+        <a href="#" class="nav-link active" data-i18n="navHome">Home</a>
+        <a href="#features" class="nav-link" data-i18n="navFeatures">Features</a>
+        <a href="#pricing" class="nav-link" data-i18n="navPricing">Pricing</a>
+        <a href="#faq" class="nav-link" data-i18n="navFaq">FAQ</a>
+        <a href="#docs" class="nav-link" data-i18n="navDocs">Documentation</a>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-btn" id="langBtn">FR</button>
+        <button class="cta-header-btn" id="ctaHeaderBtn" data-i18n="ctaBtn">Get Started</button>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- CONFIG PANEL -->
-    <section class="panel config-panel" id="configPanel">
-      <div class="panel-title">
-        <span class="panel-icon">⚙</span>
-        <span data-i18n="configTitle">Configuration du scraping</span>
-      </div>
+  <!-- HERO -->
+  <section class="hero" id="heroSection">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span data-i18n="heroLine1">Transform any</span>
+          <br/>
+          <span class="hero-purple" data-i18n="heroLine2">link</span>
+          <span> </span>
+          <span data-i18n="heroLine3">into</span>
+          <span> </span>
+          <span class="hero-purple" data-i18n="heroLine4">code.</span>
+        </h1>
+        <p class="hero-subtitle" data-i18n="heroSubtitle">
+          Enter a URL and download the complete source code of any website as a ZIP file in one click.
+        </p>
 
-      <div class="form-group url-group">
-        <label for="urlInput" data-i18n="urlLabel">URL cible</label>
-        <div class="url-wrapper">
-          <span class="url-prefix">https://</span>
-          <input
-            type="text"
-            id="urlInput"
-            data-i18n-placeholder="urlPlaceholder"
-            placeholder="example.com ou next-app.vercel.app"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <button class="paste-btn" id="pasteBtn" data-i18n-title="paste" title="Coller">⎘</button>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <!-- Mode -->
-        <div class="form-group">
-          <label data-i18n="modeLabel">Mode de scraping</label>
-          <div class="mode-selector">
-            <label class="mode-option" data-mode="fast">
-              <input type="radio" name="mode" value="fast" checked />
-              <div class="mode-card">
-                <div class="mode-icon">⚡</div>
-                <div class="mode-label" data-i18n="modeFastLabel">Rapide</div>
-                <div class="mode-desc" data-i18n="modeFastDesc">Axios + Cheerio<br/>Sites statiques/SSR</div>
-              </div>
-            </label>
-            <label class="mode-option" data-mode="full">
-              <input type="radio" name="mode" value="full" />
-              <div class="mode-card">
-                <div class="mode-icon">🎭</div>
-                <div class="mode-label" data-i18n="modeFullLabel">Complet</div>
-                <div class="mode-desc" data-i18n="modeFullDesc">Playwright headless<br/>Next.js / SPA / React</div>
-              </div>
-            </label>
+        <div class="hero-input-row">
+          <div class="hero-url-box">
+            <svg class="url-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <input
+              type="text"
+              id="urlInput"
+              data-i18n-placeholder="urlPlaceholder"
+              placeholder="https://example.com"
+              autocomplete="off"
+              spellcheck="false"
+            />
           </div>
+          <button class="hero-scrape-btn" id="startBtn">
+            <span class="btn-star">✦</span>
+            <span data-i18n="startBtn">Scrape site</span>
+          </button>
         </div>
 
-        <!-- Depth -->
-        <div class="form-group">
-          <label for="depth"><span data-i18n="depthLabel">Profondeur de crawl</span> <span class="val-display" id="depthVal">3</span></label>
-          <input type="range" id="depth" min="1" max="10" value="3" class="slider" />
-          <div class="slider-labels">
-            <span data-i18n="depthMin">1 (page seule)</span>
-            <span data-i18n="depthMax">10 (tout le site)</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <!-- Delay -->
-        <div class="form-group">
-          <label for="delay"><span data-i18n="delayLabel">Délai entre requêtes</span> <span class="val-display" id="delayVal">500ms</span></label>
-          <input type="range" id="delay" min="0" max="3000" step="100" value="500" class="slider" />
-          <div class="slider-labels"><span>0ms</span><span>3s</span></div>
-        </div>
-
-        <!-- Timeout -->
-        <div class="form-group">
-          <label for="timeout"><span data-i18n="timeoutLabel">Timeout par page</span> <span class="val-display" id="timeoutVal">30s</span></label>
-          <input type="range" id="timeout" min="5000" max="120000" step="5000" value="30000" class="slider" />
-          <div class="slider-labels"><span>5s</span><span>2min</span></div>
+        <div class="hero-pills">
+          <span class="hero-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <span data-i18n="pillFast">Fast</span>
+          </span>
+          <span class="hero-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span data-i18n="pillSecure">Secure</span>
+          </span>
+          <span class="hero-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export ZIP
+          </span>
         </div>
       </div>
 
-      <!-- Aggressive mode -->
-      <div class="toggle-row">
-        <label class="toggle-label">
-          <div class="toggle-wrapper">
-            <input type="checkbox" id="aggressive" />
-            <div class="toggle-track">
-              <div class="toggle-thumb"></div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="mock-browser">
+          <div class="mock-titlebar">
+            <span class="mock-dot dot-red"></span>
+            <span class="mock-dot dot-yellow"></span>
+            <span class="mock-dot dot-green"></span>
+            <div class="mock-addressbar">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              https://exemple.com
             </div>
           </div>
-          <div>
-            <div class="toggle-name" data-i18n="aggressiveName">Mode Agressif</div>
-            <div class="toggle-desc" data-i18n="aggressiveDesc">Concurrence x5, screenshot (mode Complet), ignore les délais partiellement</div>
+          <div class="mock-body">
+            <div class="mock-lines">
+              <div class="mock-line" style="width:82%"></div>
+              <div class="mock-line accent" style="width:55%"></div>
+              <div class="mock-line" style="width:90%"></div>
+              <div class="mock-line accent" style="width:42%"></div>
+              <div class="mock-line" style="width:68%"></div>
+              <div class="mock-line accent" style="width:60%"></div>
+              <div class="mock-line" style="width:76%"></div>
+            </div>
+            <div class="code-tag-badge">&lt;/&gt;</div>
           </div>
-        </label>
-      </div>
-
-      <div class="actions">
-        <button class="btn-start" id="startBtn">
-          <span class="btn-icon">▶</span>
-          <span data-i18n="startBtn">Lancer le scraping</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- PROGRESS PANEL -->
-    <section class="panel progress-panel hidden" id="progressPanel">
-      <div class="panel-title">
-        <span class="panel-icon">📡</span>
-        <span data-i18n="progressTitle">Progression en temps réel</span>
-        <div class="job-id-badge" id="jobIdBadge"></div>
-        <button class="cancel-btn" id="cancelBtn" data-i18n="cancelBtn">✕ Annuler</button>
-      </div>
-
-      <div class="progress-bar-outer">
-        <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
-        <div class="progress-label" id="progressLabel" data-i18n="initializing">Initialisation...</div>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat-box">
-          <div class="stat-label" data-i18n="statStatus">STATUT</div>
-          <div class="stat-value" id="statStatus" data-i18n="inProgress">En cours</div>
         </div>
-        <div class="stat-box">
-          <div class="stat-label" data-i18n="statMode">MODE</div>
-          <div class="stat-value" id="statMode">—</div>
+        <div class="visual-arrow">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <path d="M10 10 Q50 10 50 50" stroke="#7c3aed" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
+            <polygon points="46,54 54,46 50,50" fill="#7c3aed"/>
+          </svg>
         </div>
-        <div class="stat-box">
-          <div class="stat-label" data-i18n="statDepth">PROFONDEUR</div>
-          <div class="stat-value" id="statDepth">—</div>
+        <div class="mock-zip">
+          <span class="zip-emoji">🗜</span>
+          <span class="zip-filename">site-exemple.zip</span>
+          <span class="zip-check">✓</span>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="log-panel" id="logPanel">
-        <div class="log-header">
-          <span data-i18n="terminal">Terminal</span>
-          <button class="log-clear-btn" id="clearLogBtn" data-i18n="clearLogs">Vider</button>
+  <!-- JOB SECTION (progress / result / error) -->
+  <section class="job-section hidden" id="jobSection">
+    <div class="job-inner">
+
+      <!-- Progress -->
+      <div id="progressContainer">
+        <div class="job-panel-title">
+          <span>📡</span>
+          <span data-i18n="progressTitle">Real-time progress</span>
+          <div class="job-id-badge" id="jobIdBadge"></div>
+          <button class="cancel-btn" id="cancelBtn" data-i18n="cancelBtn">✕ Cancel</button>
         </div>
-        <div class="log-body" id="logBody"></div>
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+          <div class="progress-label" id="progressLabel" data-i18n="initializing">Initializing...</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-label" data-i18n="statStatus">STATUS</div>
+            <div class="stat-value" id="statStatus" data-i18n="inProgress">In progress</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label" data-i18n="statMode">MODE</div>
+            <div class="stat-value" id="statMode">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label" data-i18n="statDepth">DEPTH</div>
+            <div class="stat-value" id="statDepth">—</div>
+          </div>
+        </div>
+        <div class="log-panel">
+          <div class="log-header">
+            <span data-i18n="terminal">Terminal</span>
+            <button class="log-clear-btn" id="clearLogBtn" data-i18n="clearLogs">Clear</button>
+          </div>
+          <div class="log-body" id="logBody"></div>
+        </div>
       </div>
-    </section>
 
-    <!-- RESULT PANEL -->
-    <section class="panel result-panel hidden" id="resultPanel">
-      <div class="result-inner">
-        <div class="result-icon">✓</div>
-        <div class="result-title" data-i18n="resultTitle">Scraping terminé !</div>
+      <!-- Result -->
+      <div class="result-container hidden" id="resultContainer">
+        <div class="result-icon-circle success-circle">✓</div>
+        <div class="result-title" data-i18n="resultTitle">Scraping complete!</div>
         <div class="result-size" id="resultSize"></div>
         <div class="result-actions">
           <button class="btn-download" id="downloadBtn">
-            ⬇ <span data-i18n="downloadBtn">Télécharger le ZIP</span>
+            ⬇ <span data-i18n="downloadBtn">Download ZIP</span>
           </button>
           <button class="btn-logs" id="showLogsResultBtn">
-            📋 <span data-i18n="viewLogs">Voir les logs</span>
+            📋 <span data-i18n="viewLogs">View logs</span>
           </button>
           <button class="btn-new" id="newJobBtn">
-            ↺ <span data-i18n="newJob">Nouveau scraping</span>
+            ↺ <span data-i18n="newJob">New scraping</span>
           </button>
         </div>
       </div>
-    </section>
 
-    <!-- ERROR PANEL -->
-    <section class="panel error-panel hidden" id="errorPanel">
-      <div class="error-inner">
-        <div class="error-icon">✗</div>
-        <div class="error-title" data-i18n="errorTitle">Erreur</div>
+      <!-- Error -->
+      <div class="result-container hidden" id="errorContainer">
+        <div class="result-icon-circle error-circle">✗</div>
+        <div class="result-title error-color" data-i18n="errorTitle">Error</div>
         <div class="error-msg" id="errorMsg"></div>
         <div class="result-actions">
           <button class="btn-logs" id="showLogsErrorBtn">
-            📋 <span data-i18n="viewLogs">Voir les logs</span>
+            📋 <span data-i18n="viewLogs">View logs</span>
           </button>
-          <button class="btn-new" id="retryBtn">↺ <span data-i18n="retry">Réessayer</span></button>
+          <button class="btn-new" id="retryBtn">↺ <span data-i18n="retry">Retry</span></button>
         </div>
       </div>
-    </section>
 
-    <!-- LOG MODAL (shared, shown from result/error panels) -->
-    <div class="log-modal-overlay hidden" id="logModalOverlay">
-      <div class="log-modal">
-        <div class="log-modal-header">
-          <span data-i18n="terminal">Terminal</span>
-          <button class="log-modal-close" id="logModalClose">✕</button>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how">
+    <div class="section-inner">
+      <h2 class="section-title" data-i18n="howTitle">How it works?</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-top">
+            <div class="step-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <span class="step-num">1</span>
+          </div>
+          <div class="step-title" data-i18n="step1Title">Enter the link</div>
+          <div class="step-desc" data-i18n="step1Desc">Paste the URL of the site you want to scrape.</div>
         </div>
-        <div class="log-modal-body" id="logModalBody"></div>
+        <div class="step-connector" aria-hidden="true">- - - - -</div>
+        <div class="step-card">
+          <div class="step-top">
+            <div class="step-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </div>
+            <span class="step-num">2</span>
+          </div>
+          <div class="step-title" data-i18n="step2Title">Site analysis</div>
+          <div class="step-desc" data-i18n="step2Desc">Our tool retrieves all the site's code.</div>
+        </div>
+        <div class="step-connector" aria-hidden="true">- - - - -</div>
+        <div class="step-card">
+          <div class="step-top">
+            <div class="step-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <span class="step-num">3</span>
+          </div>
+          <div class="step-title" data-i18n="step3Title">ZIP generation</div>
+          <div class="step-desc" data-i18n="step3Desc">The code is organized and compressed into a ZIP file.</div>
+        </div>
+        <div class="step-connector" aria-hidden="true">- - - - -</div>
+        <div class="step-card">
+          <div class="step-top">
+            <div class="step-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <span class="step-num">4</span>
+          </div>
+          <div class="step-title" data-i18n="step4Title">Download</div>
+          <div class="step-desc" data-i18n="step4Desc">Download your ZIP in one click.</div>
+        </div>
       </div>
     </div>
-  </main>
+  </section>
 
-  <!-- INFO FOOTER -->
+  <!-- FEATURES -->
+  <section class="features-section" id="features">
+    <div class="section-inner">
+      <h2 class="section-title" data-i18n="featuresTitle">Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon fi-purple">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div class="feature-title" data-i18n="feat1Title">Complete scraping</div>
+          <div class="feature-desc" data-i18n="feat1Desc">Retrieves HTML, CSS, JS, images and other resources.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon fi-green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="feature-title" data-i18n="feat2Title">Secure</div>
+          <div class="feature-desc" data-i18n="feat2Desc">No information is stored. Your data stays private.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon fi-yellow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="feature-title" data-i18n="feat3Title">Ultra fast</div>
+          <div class="feature-desc" data-i18n="feat3Desc">Get the complete source code in seconds.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon fi-blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="feature-title" data-i18n="feat4Title">Export ZIP</div>
+          <div class="feature-desc" data-i18n="feat4Desc">Organized file ready to use directly.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
   <footer>
     <div class="footer-inner">
-      <div class="footer-tips">
-        <div class="tip"><span class="tip-icon">💡</span> <span data-i18n="tip1"></span></div>
-        <div class="tip"><span class="tip-icon">⚡</span> <span data-i18n="tip2"></span></div>
-        <div class="tip"><span class="tip-icon">📁</span> <span data-i18n="tip3"></span></div>
+      <div class="footer-top">
+        <div class="footer-logo">
+          <span class="logo-bracket">&lt;/&gt;</span>
+          <span class="logo-name">ScrapLink</span>
+        </div>
+        <div class="footer-links">
+          <a href="#" data-i18n="footerAbout">About</a>
+          <a href="#" data-i18n="footerContact">Contact</a>
+          <a href="#" data-i18n="footerTerms">Terms of use</a>
+          <a href="#" data-i18n="footerPrivacy">Privacy policy</a>
+        </div>
+        <div class="footer-social">
+          <a href="#" class="social-link" title="GitHub">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+          <a href="#" class="social-link" title="Twitter / X">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="#" class="social-link" title="Email">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </a>
+        </div>
       </div>
-      <div class="footer-credit">NextScraper Pro — by Xhris Dior</div>
+      <div class="footer-bottom">
+        <span>© 2024 ScrapLink. <span data-i18n="footerRights">All rights reserved.</span></span>
+      </div>
     </div>
   </footer>
+
+  <!-- LOG MODAL -->
+  <div class="log-modal-overlay hidden" id="logModalOverlay">
+    <div class="log-modal">
+      <div class="log-modal-header">
+        <span data-i18n="terminal">Terminal</span>
+        <button class="log-modal-close" id="logModalClose">✕</button>
+      </div>
+      <div class="log-modal-body" id="logModalBody"></div>
+    </div>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/app.js"></script>

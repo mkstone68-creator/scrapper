@@ -4,9 +4,6 @@ const { Server } = require('socket.io');
 const path = require('path');
 const fs = require('fs-extra');
 const archiver = require('archiver');
-const { v4: uuidv4 } = (function() {
-  try { return require('crypto'); } catch(e) { return { v4: () => Math.random().toString(36).slice(2) }; }
-})();
 
 const { FastScraper } = require('./scrapers/fastScraper');
 const { FullScraper } = require('./scrapers/fullScraper');
@@ -28,6 +25,45 @@ fs.ensureDirSync(DOWNLOADS_DIR);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ─── Rate Limiting ────────────────────────────────────────────────────────────
+
+const ipLimits = new Map();
+const DAILY_LIMIT = 10;
+const BLOCKED_DOMAINS = ['xhrishoost.site'];
+
+function getClientIp(socket) {
+  const fwd = socket.handshake.headers['x-forwarded-for'];
+  if (fwd) return fwd.split(',')[0].trim();
+  return socket.handshake.address || '0.0.0.0';
+}
+
+function checkRateLimit(ip) {
+  const today = new Date().toISOString().slice(0, 10);
+  let rec = ipLimits.get(ip);
+  if (!rec || rec.date !== today) {
+    ipLimits.set(ip, { count: 1, date: today });
+    return { allowed: true, remaining: DAILY_LIMIT - 1 };
+  }
+  if (rec.count >= DAILY_LIMIT) {
+    return { allowed: false, remaining: 0 };
+  }
+  rec.count++;
+  return { allowed: true, remaining: DAILY_LIMIT - rec.count };
+}
+
+function isBlockedDomain(url) {
+  const lower = url.toLowerCase();
+  return BLOCKED_DOMAINS.some(domain => lower.includes(domain));
+}
+
+// Clean up stale rate-limit entries every hour
+setInterval(() => {
+  const today = new Date().toISOString().slice(0, 10);
+  for (const [ip, rec] of ipLimits) {
+    if (rec.date !== today) ipLimits.delete(ip);
+  }
+}, 60 * 60 * 1000);
+
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
 app.get('/', (req, res) => {
@@ -37,7 +73,7 @@ app.get('/', (req, res) => {
 app.get('/download/:jobId', (req, res) => {
   const zipPath = path.join(DOWNLOADS_DIR, `${req.params.jobId}.zip`);
   if (!fs.existsSync(zipPath)) {
-    return res.status(404).json({ error: 'Fichier non trouvé ou expiré' });
+    return res.status(404).json({ error: 'File not found or expired' });
   }
   res.download(zipPath, 'website.zip');
 });
@@ -55,9 +91,30 @@ app.delete('/job/:jobId', (req, res) => {
 const activeJobs = new Map();
 
 io.on('connection', (socket) => {
-  console.log(`[+] Client connecté: ${socket.id}`);
+  console.log(`[+] Client connected: ${socket.id}`);
 
   socket.on('start-scrape', async (config) => {
+    const ip = getClientIp(socket);
+
+    // Block owner's domain
+    if (isBlockedDomain(config.url)) {
+      socket.emit('job-error', {
+        jobId: null,
+        message: '🚫 This site cannot be scraped — it belongs to the service owner.',
+      });
+      return;
+    }
+
+    // Enforce daily limit
+    const { allowed, remaining } = checkRateLimit(ip);
+    if (!allowed) {
+      socket.emit('job-error', {
+        jobId: null,
+        message: `⛔ Daily limit reached (${DAILY_LIMIT} scrapes/day per IP). Try again tomorrow.`,
+      });
+      return;
+    }
+
     const jobId = generateId();
     const jobDir = path.join(JOBS_DIR, jobId);
     fs.ensureDirSync(jobDir);
@@ -65,10 +122,11 @@ io.on('connection', (socket) => {
     const logger = createLogger(socket, jobId);
     activeJobs.set(jobId, { socket, cancelled: false });
 
-    socket.emit('job-started', { jobId });
-    logger.info(`🚀 Démarrage du job ${jobId}`);
-    logger.info(`📋 Mode: ${config.mode === 'full' ? 'Complet (Playwright)' : 'Rapide (Axios+Cheerio)'}`);
-    logger.info(`🌐 URL cible: ${config.url}`);
+    socket.emit('job-started', { jobId, remaining });
+    logger.info(`🚀 Job started: ${jobId}`);
+    logger.info(`📋 Mode: ${config.mode === 'full' ? 'Full (Playwright)' : 'Fast (Axios+Cheerio)'}`);
+    logger.info(`🌐 Target URL: ${config.url}`);
+    logger.info(`📊 Scrapes remaining today: ${remaining}`);
 
     try {
       const isCancelled = () => activeJobs.get(jobId)?.cancelled;
@@ -83,23 +141,23 @@ io.on('connection', (socket) => {
       await scraper.run();
 
       if (isCancelled()) {
-        logger.warn('⛔ Job annulé par l\'utilisateur');
+        logger.warn('⛔ Job cancelled by user');
         socket.emit('job-cancelled', { jobId });
         return;
       }
 
-      logger.info('📦 Création du fichier ZIP...');
+      logger.info('📦 Creating ZIP file...');
       const zipPath = path.join(DOWNLOADS_DIR, `${jobId}.zip`);
       await createZip(jobDir, zipPath, logger);
 
       const stats = fs.statSync(zipPath);
       const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
 
-      logger.success(`✅ Terminé ! ZIP créé: ${sizeMB} MB`);
+      logger.success(`✅ Done! ZIP created: ${sizeMB} MB`);
       socket.emit('job-complete', { jobId, sizeMB });
 
     } catch (err) {
-      logger.error(`❌ Erreur fatale: ${err.message}`);
+      logger.error(`❌ Fatal error: ${err.message}`);
       console.error(err);
       socket.emit('job-error', { jobId, message: err.message });
     } finally {
@@ -114,7 +172,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log(`[-] Client déconnecté: ${socket.id}`);
+    console.log(`[-] Client disconnected: ${socket.id}`);
   });
 });
 
@@ -126,16 +184,15 @@ function generateId() {
 
 function createLogger(socket, jobId) {
   const emit = (level, msg) => {
-    const ts = new Date().toLocaleTimeString('fr-FR');
-    const line = `[${ts}] ${msg}`;
-    console.log(line);
+    const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
+    console.log(`[${ts}] ${msg}`);
     socket.emit('log', { jobId, level, message: msg, ts });
   };
   return {
-    info: (m) => emit('info', m),
-    success: (m) => emit('success', m),
-    warn: (m) => emit('warn', m),
-    error: (m) => emit('error', m),
+    info:     (m) => emit('info', m),
+    success:  (m) => emit('success', m),
+    warn:     (m) => emit('warn', m),
+    error:    (m) => emit('error', m),
     progress: (pct, label) => socket.emit('progress', { jobId, pct, label }),
   };
 }
@@ -158,12 +215,11 @@ async function createZip(sourceDir, destPath, logger) {
   });
 }
 
-// ─── Cleanup old jobs ─────────────────────────────────────────────────────────
+// ─── Cleanup old jobs (2h) ────────────────────────────────────────────────────
 
 setInterval(() => {
-  const maxAge = 2 * 60 * 60 * 1000; // 2h
+  const maxAge = 2 * 60 * 60 * 1000;
   const now = Date.now();
-
   [JOBS_DIR, DOWNLOADS_DIR].forEach(dir => {
     if (!fs.existsSync(dir)) return;
     fs.readdirSync(dir).forEach(f => {
@@ -171,7 +227,7 @@ setInterval(() => {
       const stat = fs.statSync(fp);
       if (now - stat.mtimeMs > maxAge) {
         fs.removeSync(fp);
-        console.log(`[cleanup] Supprimé: ${fp}`);
+        console.log(`[cleanup] Removed: ${fp}`);
       }
     });
   });
@@ -181,7 +237,7 @@ setInterval(() => {
 
 server.listen(PORT, () => {
   console.log(`\n╔══════════════════════════════════════╗`);
-  console.log(`║  NextScraper Pro — Port ${PORT}          ║`);
-  console.log(`║  http://localhost:${PORT}               ║`);
+  console.log(`║  ScrapLink — Port ${PORT}               ║`);
+  console.log(`║  http://localhost:${PORT}              ║`);
   console.log(`╚══════════════════════════════════════╝\n`);
 });
