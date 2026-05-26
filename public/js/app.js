@@ -136,7 +136,7 @@ const TRANSLATIONS = {
   },
 };
 
-const BLOCKED_DOMAINS = ['xhrishoost.site'];
+const BLOCKED_DOMAINS = ['xhrishost'];
 
 // English is the default language
 let currentLang = localStorage.getItem('lang') || 'en';

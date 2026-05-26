@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const ipLimits = new Map();
 const DAILY_LIMIT = 10;
-const BLOCKED_DOMAINS = ['xhrishoost.site'];
+const BLOCKED_DOMAINS = ['xhrishost'];
 
 function getClientIp(socket) {
   const fwd = socket.handshake.headers['x-forwarded-for'];

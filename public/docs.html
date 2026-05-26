@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScrapLink — Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .page-hero {
+      padding: 72px 24px 48px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-hero h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 14px;
+    }
+    .page-hero p {
+      color: var(--text-dim);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── Docs layout ── */
+    .docs-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .docs-layout { grid-template-columns: 1fr; }
+      .docs-sidebar { display: none; }
+    }
+
+    /* ── Sidebar ── */
+    .docs-sidebar {
+      position: sticky;
+      top: 80px;
+    }
+    .sidebar-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dimmer);
+      margin-bottom: 10px;
+      padding-left: 10px;
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sidebar-nav a {
+      display: block;
+      padding: 7px 10px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      border-left: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .sidebar-nav a:hover {
+      color: var(--text);
+      background: var(--bg2);
+    }
+    .sidebar-nav a.active {
+      color: var(--purple-lite);
+      border-left-color: var(--purple);
+      background: rgba(124,58,237,0.06);
+    }
+
+    /* ── Content ── */
+    .docs-content {
+      min-width: 0;
+    }
+    .docs-section {
+      margin-bottom: 56px;
+      scroll-margin-top: 88px;
+    }
+    .docs-section h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .docs-section h2 .section-icon {
+      font-size: 1.2rem;
+    }
+    .docs-section h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 24px 0 10px;
+      color: var(--text);
+    }
+    .docs-section p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+    .docs-section ul, .docs-section ol {
+      margin: 10px 0 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .docs-section li {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .docs-section li::marker { color: var(--purple); }
+    .docs-section code {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-family: 'Courier New', monospace;
+      color: var(--purple-lite);
+    }
+    .docs-section strong { color: var(--text); }
+    .docs-section a { color: var(--purple-lite); }
+
+    /* callout boxes */
+    .callout {
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      margin: 16px 0;
+      display: flex;
+      gap: 12px;
+    }
+    .callout-icon { flex-shrink: 0; font-size: 1.1rem; }
+    .callout-body { color: var(--text-dim); }
+    .callout-body strong { color: var(--text); }
+    .callout.info  { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.25); }
+    .callout.warn  { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); }
+    .callout.error { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25);  }
+    .callout.tip   { background: rgba(34,197,94,0.08);  border: 1px solid rgba(34,197,94,0.25);  }
+
+    /* mode comparison table */
+    .mode-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin: 16px 0;
+    }
+    .mode-table th {
+      background: var(--bg3);
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .mode-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+    .mode-table tr:nth-child(even) td { background: var(--bg2); }
+    .badge-fast  { color: #4ade80; font-weight: 700; }
+    .badge-full  { color: var(--purple-lite); font-weight: 700; }
+
+    /* zip tree */
+    .zip-tree {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 2;
+      margin: 14px 0;
+    }
+    .zip-tree .dir  { color: var(--purple-lite); font-weight: 700; }
+    .zip-tree .file { color: var(--text); }
+    .zip-tree .comment { color: var(--text-dimmer); }
+
+    /* steps inline */
+    .step-list {
+      counter-reset: step;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .step-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .step-num-badge {
+      counter-increment: step;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--purple-lite));
+      color: white;
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-item p {
+      margin: 0;
+      padding-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo" style="text-decoration:none">
+        <span class="logo-bracket">&lt;/&gt;</span>
+        <span class="logo-name">ScrapLink</span>
+      </a>
+      <nav class="nav">
+        <a href="/" class="nav-link" data-i18n="navHome">Home</a>
+        <a href="/#features" class="nav-link" data-i18n="navFeatures">Features</a>
+        <a href="/faq.html" class="nav-link" data-i18n="navFaq">FAQ</a>
+        <a href="/docs.html" class="nav-link active" data-i18n="navDocs">Documentation</a>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-btn" id="langBtn">FR</button>
+        <a href="/" class="cta-header-btn" data-i18n="ctaBtn" style="text-decoration:none;display:inline-flex;align-items:center">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE HERO -->
+  <section class="page-hero">
+    <h1 data-i18n="docsTitle">Documentation</h1>
+    <p data-i18n="docsSubtitle">Everything you need to get the most out of ScrapLink.</p>
+  </section>
+
+  <!-- DOCS LAYOUT -->
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="docs-sidebar">
+      <div class="sidebar-label" data-i18n="sidebarLabel">On this page</div>
+      <nav class="sidebar-nav">
+        <a href="#intro"          class="active" data-i18n="sideIntro">Introduction</a>
+        <a href="#getting-started"             data-i18n="sideStart">Getting Started</a>
+        <a href="#modes"                       data-i18n="sideModes">Scraping Modes</a>
+        <a href="#fast-mode"                   data-i18n="sideFast">↳ Fast Mode</a>
+        <a href="#full-mode"                   data-i18n="sideFull">↳ Full Mode</a>
+        <a href="#output"                      data-i18n="sideOutput">ZIP Output</a>
+        <a href="#limits"                      data-i18n="sideLimits">Rate Limits</a>
+        <a href="#blocked"                     data-i18n="sideBlocked">Blocked Domains</a>
+        <a href="#tips"                        data-i18n="sideTips">Tips & Tricks</a>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="docs-content">
+
+      <!-- Introduction -->
+      <section class="docs-section" id="intro">
+        <h2><span class="section-icon">📖</span> <span data-i18n="introTitle">Introduction</span></h2>
+        <p data-i18n="introP1">ScrapLink is a web scraping service that lets you download the complete source code of any website as an organized ZIP archive — no coding required.</p>
+        <p data-i18n="introP2">It supports two scraping engines: a lightweight HTTP client for static sites, and a full headless browser for JavaScript-rendered applications.</p>
+        <div class="callout info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body" data-i18n="introCallout">ScrapLink is intended for legitimate use cases such as offline archiving, development reference, and design inspiration. Always respect the target site's <code>robots.txt</code> and terms of service.</div>
+        </div>
+      </section>
+
+      <!-- Getting Started -->
+      <section class="docs-section" id="getting-started">
+        <h2><span class="section-icon">🚀</span> <span data-i18n="startTitle">Getting Started</span></h2>
+        <p data-i18n="startP1">Scraping a website with ScrapLink takes less than a minute.</p>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num-badge">1</div>
+            <p data-i18n="startStep1">Go to the <a href="/">homepage</a> and paste the full URL of the site you want to scrape (e.g. <code>https://example.com</code>).</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num-badge">2</div>
+            <p data-i18n="startStep2">Click <strong>Scrape site</strong> or press <code>Enter</code>. ScrapLink will start analysing the target site immediately.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num-badge">3</div>
+            <p data-i18n="startStep3">Watch the real-time log terminal as pages and assets are retrieved. A progress bar shows the overall completion.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-num-badge">4</div>
+            <p data-i18n="startStep4">Once complete, click <strong>Download ZIP</strong>. Your file is available for <strong>2 hours</strong>, then auto-deleted.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scraping Modes -->
+      <section class="docs-section" id="modes">
+        <h2><span class="section-icon">⚙️</span> <span data-i18n="modesTitle">Scraping Modes</span></h2>
+        <p data-i18n="modesP1">ScrapLink offers two engines. Choosing the right one is important for getting complete results.</p>
+        <table class="mode-table">
+          <thead>
+            <tr>
+              <th data-i18n="tblFeature">Feature</th>
+              <th><span class="badge-fast" data-i18n="tblFast">Fast Mode</span></th>
+              <th><span class="badge-full" data-i18n="tblFull">Full Mode</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-i18n="tblEngine">Engine</td>
+              <td>Axios + Cheerio</td>
+              <td>Playwright (Chromium)</td>
+            </tr>
+            <tr>
+              <td data-i18n="tblSpeed">Speed</td>
+              <td data-i18n="tblFastSpeed">Very fast (seconds)</td>
+              <td data-i18n="tblFullSpeed">Slower (browser startup)</td>
+            </tr>
+            <tr>
+              <td data-i18n="tblJs">JavaScript execution</td>
+              <td data-i18n="tblFastJs">No</td>
+              <td data-i18n="tblFullJs">Yes (full render)</td>
+            </tr>
+            <tr>
+              <td data-i18n="tblBestFor">Best for</td>
+              <td data-i18n="tblFastBest">Static sites, WordPress, simple SSR</td>
+              <td data-i18n="tblFullBest">React, Next.js, Vue, Angular, SPAs</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Fast Mode -->
+      <section class="docs-section" id="fast-mode">
+        <h2><span class="section-icon">⚡</span> <span data-i18n="fastTitle">Fast Mode</span></h2>
+        <p data-i18n="fastP1">Fast mode uses <strong>Axios</strong> to make HTTP requests and <strong>Cheerio</strong> (a server-side jQuery) to parse the HTML and discover linked assets.</p>
+        <h3 data-i18n="fastWhenTitle">When to use it</h3>
+        <ul>
+          <li data-i18n="fastLi1">Static HTML websites</li>
+          <li data-i18n="fastLi2">WordPress, Joomla, and classic CMS sites</li>
+          <li data-i18n="fastLi3">Server-side rendered pages (PHP, Ruby on Rails, Django)</li>
+          <li data-i18n="fastLi4">Documentation sites (GitBook, MkDocs, Docusaurus static export)</li>
+        </ul>
+        <h3 data-i18n="fastLimitTitle">Limitations</h3>
+        <ul>
+          <li data-i18n="fastLimitLi1">Does <strong>not</strong> execute JavaScript — content rendered client-side will be missing</li>
+          <li data-i18n="fastLimitLi2">Cannot handle login-gated or AJAX-loaded content</li>
+        </ul>
+        <div class="callout tip">
+          <span class="callout-icon">✅</span>
+          <div class="callout-body" data-i18n="fastTip">If the target site looks the same with JavaScript disabled in your browser, Fast mode will work perfectly.</div>
+        </div>
+      </section>
+
+      <!-- Full Mode -->
+      <section class="docs-section" id="full-mode">
+        <h2><span class="section-icon">🎭</span> <span data-i18n="fullTitle">Full Mode (Playwright)</span></h2>
+        <p data-i18n="fullP1">Full mode launches a headless <strong>Chromium</strong> browser via Playwright. It navigates to each page, waits for the JavaScript to fully execute, then captures the rendered HTML and all loaded assets.</p>
+        <h3 data-i18n="fullWhenTitle">When to use it</h3>
+        <ul>
+          <li data-i18n="fullLi1">React, Next.js, Vue, Angular, Svelte applications</li>
+          <li data-i18n="fullLi2">Single Page Applications (SPAs)</li>
+          <li data-i18n="fullLi3">Sites that load content via client-side API calls</li>
+          <li data-i18n="fullLi4">Any site where Fast mode returns empty or incomplete content</li>
+        </ul>
+        <h3 data-i18n="fullLimitTitle">Limitations</h3>
+        <ul>
+          <li data-i18n="fullLimitLi1">Slower than Fast mode due to browser startup overhead</li>
+          <li data-i18n="fullLimitLi2">May be blocked by advanced bot detection (Cloudflare, hCaptcha)</li>
+          <li data-i18n="fullLimitLi3">Cannot access content behind authentication</li>
+        </ul>
+        <div class="callout warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-body" data-i18n="fullWarn">Full mode uses significantly more server resources. Please use it only when needed, and be patient while the browser completes rendering.</div>
+        </div>
+      </section>
+
+      <!-- ZIP Output -->
+      <section class="docs-section" id="output">
+        <h2><span class="section-icon">📦</span> <span data-i18n="outputTitle">ZIP Output Structure</span></h2>
+        <p data-i18n="outputP1">The downloaded ZIP is organized to mirror the original site's asset structure. Here is a typical example:</p>
+        <div class="zip-tree">
+          <div><span class="dir">website.zip</span></div>
+          <div>&nbsp;├── <span class="file">index.html</span></div>
+          <div>&nbsp;├── <span class="file">about.html</span></div>
+          <div>&nbsp;├── <span class="file">contact.html</span></div>
+          <div>&nbsp;├── <span class="dir">css/</span></div>
+          <div>&nbsp;│&nbsp;&nbsp; ├── <span class="file">main.css</span></div>
+          <div>&nbsp;│&nbsp;&nbsp; └── <span class="file">fonts.css</span></div>
+          <div>&nbsp;├── <span class="dir">js/</span></div>
+          <div>&nbsp;│&nbsp;&nbsp; ├── <span class="file">app.js</span></div>
+          <div>&nbsp;│&nbsp;&nbsp; └── <span class="file">vendor.js</span></div>
+          <div>&nbsp;├── <span class="dir">images/</span></div>
+          <div>&nbsp;│&nbsp;&nbsp; ├── <span class="file">hero.webp</span></div>
+          <div>&nbsp;│&nbsp;&nbsp; └── <span class="file">logo.svg</span></div>
+          <div>&nbsp;├── <span class="dir">fonts/</span></div>
+          <div>&nbsp;│&nbsp;&nbsp; └── <span class="file">inter.woff2</span></div>
+          <div>&nbsp;└── <span class="dir">_next/static/</span> <span class="comment">&nbsp;← Next.js only</span></div>
+        </div>
+        <p data-i18n="outputP2">Paths are rewritten so HTML files reference local assets — you can open <code>index.html</code> directly in a browser for most static sites.</p>
+        <div class="callout info">
+          <span class="callout-icon">⏱</span>
+          <div class="callout-body" data-i18n="outputCallout">ZIP files are stored on our servers for <strong>2 hours</strong> after creation, then permanently deleted. Download your file promptly.</div>
+        </div>
+      </section>
+
+      <!-- Rate Limits -->
+      <section class="docs-section" id="limits">
+        <h2><span class="section-icon">📊</span> <span data-i18n="limitsTitle">Rate Limits</span></h2>
+        <p data-i18n="limitsP1">To ensure a fair and stable service for everyone, ScrapLink enforces the following limit:</p>
+        <ul>
+          <li data-i18n="limitsLi1"><strong>10 scrapes per day</strong> per IP address</li>
+          <li data-i18n="limitsLi2">The counter resets every day at <strong>midnight UTC</strong></li>
+          <li data-i18n="limitsLi3">The limit is applied server-side and cannot be bypassed</li>
+        </ul>
+        <div class="callout warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-body" data-i18n="limitsCallout">If you hit the daily limit, you will receive a clear error message. Simply try again tomorrow after midnight UTC.</div>
+        </div>
+      </section>
+
+      <!-- Blocked Domains -->
+      <section class="docs-section" id="blocked">
+        <h2><span class="section-icon">🚫</span> <span data-i18n="blockedTitle">Blocked Domains</span></h2>
+        <p data-i18n="blockedP1">Certain domains are permanently blocked and cannot be scraped through ScrapLink. Any URL containing the keyword <code>xhrishost</code> (including <code>xhrishost.site</code>) is blocked — these domains belong to the service owner.</p>
+        <p data-i18n="blockedP2">Attempting to scrape a blocked domain will result in an immediate error, both on the client and server side.</p>
+        <div class="callout error">
+          <span class="callout-icon">🚫</span>
+          <div class="callout-body" data-i18n="blockedCallout">Beyond the explicit blocklist, you are responsible for ensuring that your use of ScrapLink complies with the target site's <code>robots.txt</code>, terms of service, and applicable laws (GDPR, CFAA, etc.).</div>
+        </div>
+      </section>
+
+      <!-- Tips -->
+      <section class="docs-section" id="tips">
+        <h2><span class="section-icon">💡</span> <span data-i18n="tipsTitle">Tips & Tricks</span></h2>
+        <h3 data-i18n="tipsT1">Choose the right mode</h3>
+        <p data-i18n="tipsP1">Start with <strong>Fast mode</strong>. If the result is empty or missing content, switch to <strong>Full mode</strong>. Full mode is always more complete but takes longer.</p>
+        <h3 data-i18n="tipsT2">Next.js and React apps</h3>
+        <p data-i18n="tipsP2">Always use Full (Playwright) mode for Next.js, React, Vue, or any SPA. Fast mode will only capture the empty shell HTML without any rendered content.</p>
+        <h3 data-i18n="tipsT3">Large sites</h3>
+        <p data-i18n="tipsP3">For large sites with hundreds of pages, the scrape may take several minutes. Watch the terminal log to track which pages are being processed. The progress bar shows real-time completion.</p>
+        <h3 data-i18n="tipsT4">Open your ZIP locally</h3>
+        <p data-i18n="tipsP4">Unzip the archive and open <code>index.html</code> in your browser. For sites that use absolute paths or require a server, use a local server like <code>npx serve .</code> inside the unzipped folder.</p>
+        <div class="callout tip">
+          <span class="callout-icon">🎯</span>
+          <div class="callout-body" data-i18n="tipsFinalCallout">Still have questions? Check out our <a href="/faq.html">FAQ page</a> or <a href="/">start scraping</a> right away.</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <span class="logo-bracket">&lt;/&gt;</span>
+          <span class="logo-name">ScrapLink</span>
+        </div>
+        <div class="footer-links">
+          <a href="#" data-i18n="footerAbout">About</a>
+          <a href="#" data-i18n="footerContact">Contact</a>
+          <a href="#" data-i18n="footerTerms">Terms of use</a>
+          <a href="#" data-i18n="footerPrivacy">Privacy policy</a>
+        </div>
+        <div class="footer-social">
+          <a href="#" class="social-link" title="GitHub">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+          <a href="#" class="social-link" title="Twitter / X">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="#" class="social-link" title="Email">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024 ScrapLink. <span data-i18n="footerRights">All rights reserved.</span></span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const T = {
+      en: {
+        navHome:'Home', navFeatures:'Features', navFaq:'FAQ', navDocs:'Documentation',
+        ctaBtn:'Get Started',
+        docsTitle:'Documentation',
+        docsSubtitle:'Everything you need to get the most out of ScrapLink.',
+        sidebarLabel:'On this page',
+        sideIntro:'Introduction', sideStart:'Getting Started', sideModes:'Scraping Modes',
+        sideFast:'↳ Fast Mode', sideFull:'↳ Full Mode', sideOutput:'ZIP Output',
+        sideLimits:'Rate Limits', sideBlocked:'Blocked Domains', sideTips:'Tips & Tricks',
+        introTitle:'Introduction',
+        introP1:'ScrapLink is a web scraping service that lets you download the complete source code of any website as an organized ZIP archive — no coding required.',
+        introP2:'It supports two scraping engines: a lightweight HTTP client for static sites, and a full headless browser for JavaScript-rendered applications.',
+        introCallout:"ScrapLink is intended for legitimate use cases such as offline archiving, development reference, and design inspiration. Always respect the target site's <code>robots.txt</code> and terms of service.",
+        startTitle:'Getting Started',
+        startP1:'Scraping a website with ScrapLink takes less than a minute.',
+        startStep1:'Go to the <a href="/">homepage</a> and paste the full URL of the site you want to scrape (e.g. <code>https://example.com</code>).',
+        startStep2:'Click <strong>Scrape site</strong> or press <code>Enter</code>. ScrapLink will start analysing the target site immediately.',
+        startStep3:'Watch the real-time log terminal as pages and assets are retrieved. A progress bar shows the overall completion.',
+        startStep4:'Once complete, click <strong>Download ZIP</strong>. Your file is available for <strong>2 hours</strong>, then auto-deleted.',
+        modesTitle:'Scraping Modes',
+        modesP1:'ScrapLink offers two engines. Choosing the right one is important for getting complete results.',
+        tblFeature:'Feature', tblFast:'Fast Mode', tblFull:'Full Mode',
+        tblEngine:'Engine', tblSpeed:'Speed', tblJs:'JavaScript execution', tblBestFor:'Best for',
+        tblFastSpeed:'Very fast (seconds)', tblFullSpeed:'Slower (browser startup)',
+        tblFastJs:'No', tblFullJs:'Yes (full render)',
+        tblFastBest:'Static sites, WordPress, simple SSR',
+        tblFullBest:'React, Next.js, Vue, Angular, SPAs',
+        fastTitle:'Fast Mode',
+        fastP1:'Fast mode uses <strong>Axios</strong> to make HTTP requests and <strong>Cheerio</strong> (a server-side jQuery) to parse the HTML and discover linked assets.',
+        fastWhenTitle:'When to use it',
+        fastLi1:'Static HTML websites', fastLi2:'WordPress, Joomla, and classic CMS sites',
+        fastLi3:'Server-side rendered pages (PHP, Ruby on Rails, Django)',
+        fastLi4:'Documentation sites (GitBook, MkDocs, Docusaurus static export)',
+        fastLimitTitle:'Limitations',
+        fastLimitLi1:'Does <strong>not</strong> execute JavaScript — content rendered client-side will be missing',
+        fastLimitLi2:'Cannot handle login-gated or AJAX-loaded content',
+        fastTip:'If the target site looks the same with JavaScript disabled in your browser, Fast mode will work perfectly.',
+        fullTitle:'Full Mode (Playwright)',
+        fullP1:'Full mode launches a headless <strong>Chromium</strong> browser via Playwright. It navigates to each page, waits for the JavaScript to fully execute, then captures the rendered HTML and all loaded assets.',
+        fullWhenTitle:'When to use it',
+        fullLi1:'React, Next.js, Vue, Angular, Svelte applications',
+        fullLi2:'Single Page Applications (SPAs)',
+        fullLi3:'Sites that load content via client-side API calls',
+        fullLi4:'Any site where Fast mode returns empty or incomplete content',
+        fullLimitTitle:'Limitations',
+        fullLimitLi1:'Slower than Fast mode due to browser startup overhead',
+        fullLimitLi2:'May be blocked by advanced bot detection (Cloudflare, hCaptcha)',
+        fullLimitLi3:'Cannot access content behind authentication',
+        fullWarn:'Full mode uses significantly more server resources. Please use it only when needed, and be patient while the browser completes rendering.',
+        outputTitle:'ZIP Output Structure',
+        outputP1:"The downloaded ZIP is organized to mirror the original site's asset structure. Here is a typical example:",
+        outputP2:'Paths are rewritten so HTML files reference local assets — you can open <code>index.html</code> directly in a browser for most static sites.',
+        outputCallout:'ZIP files are stored on our servers for <strong>2 hours</strong> after creation, then permanently deleted. Download your file promptly.',
+        limitsTitle:'Rate Limits',
+        limitsP1:'To ensure a fair and stable service for everyone, ScrapLink enforces the following limit:',
+        limitsLi1:'<strong>10 scrapes per day</strong> per IP address',
+        limitsLi2:'The counter resets every day at <strong>midnight UTC</strong>',
+        limitsLi3:'The limit is applied server-side and cannot be bypassed',
+        limitsCallout:'If you hit the daily limit, you will receive a clear error message. Simply try again tomorrow after midnight UTC.',
+        blockedTitle:'Blocked Domains',
+        blockedP1:'Certain domains are permanently blocked and cannot be scraped through ScrapLink. Any URL containing the keyword <code>xhrishost</code> (including <code>xhrishost.site</code>) is blocked — these domains belong to the service owner.',
+        blockedP2:'Attempting to scrape a blocked domain will result in an immediate error, both on the client and server side.',
+        blockedCallout:"Beyond the explicit blocklist, you are responsible for ensuring that your use of ScrapLink complies with the target site's <code>robots.txt</code>, terms of service, and applicable laws (GDPR, CFAA, etc.).",
+        tipsTitle:'Tips & Tricks',
+        tipsT1:'Choose the right mode',
+        tipsP1:'Start with <strong>Fast mode</strong>. If the result is empty or missing content, switch to <strong>Full mode</strong>. Full mode is always more complete but takes longer.',
+        tipsT2:'Next.js and React apps',
+        tipsP2:'Always use Full (Playwright) mode for Next.js, React, Vue, or any SPA. Fast mode will only capture the empty shell HTML without any rendered content.',
+        tipsT3:'Large sites',
+        tipsP3:'For large sites with hundreds of pages, the scrape may take several minutes. Watch the terminal log to track which pages are being processed. The progress bar shows real-time completion.',
+        tipsT4:'Open your ZIP locally',
+        tipsP4:'Unzip the archive and open <code>index.html</code> in your browser. For sites that use absolute paths or require a server, use a local server like <code>npx serve .</code> inside the unzipped folder.',
+        tipsFinalCallout:'Still have questions? Check out our <a href="/faq.html">FAQ page</a> or <a href="/">start scraping</a> right away.',
+        footerAbout:'About', footerContact:'Contact', footerTerms:'Terms of use',
+        footerPrivacy:'Privacy policy', footerRights:'All rights reserved.',
+      },
+      fr: {
+        navHome:'Accueil', navFeatures:'Fonctionnalités', navFaq:'FAQ', navDocs:'Documentation',
+        ctaBtn:'Commencer',
+        docsTitle:'Documentation',
+        docsSubtitle:'Tout ce dont vous avez besoin pour tirer le meilleur de ScrapLink.',
+        sidebarLabel:'Sur cette page',
+        sideIntro:'Introduction', sideStart:'Démarrage rapide', sideModes:'Modes de scraping',
+        sideFast:'↳ Mode Rapide', sideFull:'↳ Mode Complet', sideOutput:'Contenu du ZIP',
+        sideLimits:'Limites', sideBlocked:'Domaines bloqués', sideTips:'Astuces',
+        introTitle:'Introduction',
+        introP1:"ScrapLink est un service de scraping web qui vous permet de télécharger le code source complet de n'importe quel site sous forme d'archive ZIP organisée — sans aucune compétence en programmation.",
+        introP2:"Il prend en charge deux moteurs : un client HTTP léger pour les sites statiques, et un navigateur headless complet pour les applications JavaScript.",
+        introCallout:"ScrapLink est destiné à des usages légitimes : archivage hors ligne, référence de développement, inspiration design. Respectez toujours le <code>robots.txt</code> et les conditions d'utilisation du site cible.",
+        startTitle:'Démarrage rapide',
+        startP1:'Scraper un site avec ScrapLink prend moins d\'une minute.',
+        startStep1:'Allez sur la <a href="/">page d\'accueil</a> et collez l\'URL complète du site à scraper (ex. <code>https://exemple.com</code>).',
+        startStep2:'Cliquez sur <strong>Scraper le site</strong> ou appuyez sur <code>Entrée</code>. ScrapLink commence immédiatement à analyser le site cible.',
+        startStep3:'Suivez le terminal de logs en temps réel pendant que les pages et assets sont récupérés. Une barre de progression indique l\'avancement global.',
+        startStep4:'Une fois terminé, cliquez sur <strong>Télécharger le ZIP</strong>. Votre fichier est disponible pendant <strong>2 heures</strong>, puis auto-supprimé.',
+        modesTitle:'Modes de scraping',
+        modesP1:'ScrapLink propose deux moteurs. Choisir le bon est essentiel pour obtenir des résultats complets.',
+        tblFeature:'Fonctionnalité', tblFast:'Mode Rapide', tblFull:'Mode Complet',
+        tblEngine:'Moteur', tblSpeed:'Vitesse', tblJs:'Exécution JavaScript', tblBestFor:'Idéal pour',
+        tblFastSpeed:'Très rapide (secondes)', tblFullSpeed:'Plus lent (démarrage navigateur)',
+        tblFastJs:'Non', tblFullJs:'Oui (rendu complet)',
+        tblFastBest:'Sites statiques, WordPress, SSR simple',
+        tblFullBest:'React, Next.js, Vue, Angular, SPA',
+        fastTitle:'Mode Rapide',
+        fastP1:'Le mode Rapide utilise <strong>Axios</strong> pour faire des requêtes HTTP et <strong>Cheerio</strong> (un jQuery côté serveur) pour parser le HTML et découvrir les assets liés.',
+        fastWhenTitle:'Quand l\'utiliser',
+        fastLi1:'Sites HTML statiques', fastLi2:'WordPress, Joomla et CMS classiques',
+        fastLi3:'Pages rendues côté serveur (PHP, Ruby on Rails, Django)',
+        fastLi4:'Sites de documentation (GitBook, MkDocs, export statique Docusaurus)',
+        fastLimitTitle:'Limitations',
+        fastLimitLi1:'N\'exécute <strong>pas</strong> JavaScript — le contenu rendu côté client sera absent',
+        fastLimitLi2:'Ne peut pas gérer le contenu nécessitant une connexion ou chargé via AJAX',
+        fastTip:'Si le site cible a le même aspect avec JavaScript désactivé dans votre navigateur, le mode Rapide fonctionnera parfaitement.',
+        fullTitle:'Mode Complet (Playwright)',
+        fullP1:'Le mode Complet lance un navigateur <strong>Chromium</strong> headless via Playwright. Il navigue vers chaque page, attend l\'exécution complète du JavaScript, puis capture le HTML rendu et tous les assets chargés.',
+        fullWhenTitle:'Quand l\'utiliser',
+        fullLi1:'Applications React, Next.js, Vue, Angular, Svelte',
+        fullLi2:'Single Page Applications (SPA)',
+        fullLi3:'Sites qui chargent du contenu via des appels API côté client',
+        fullLi4:'Tout site dont le résultat est vide ou incomplet en mode Rapide',
+        fullLimitTitle:'Limitations',
+        fullLimitLi1:'Plus lent que le mode Rapide en raison du démarrage du navigateur',
+        fullLimitLi2:'Peut être bloqué par une détection avancée de bots (Cloudflare, hCaptcha)',
+        fullLimitLi3:'Ne peut pas accéder au contenu nécessitant une authentification',
+        fullWarn:'Le mode Complet utilise beaucoup plus de ressources serveur. Utilisez-le uniquement quand nécessaire et soyez patient pendant le rendu.',
+        outputTitle:'Structure du ZIP',
+        outputP1:"Le ZIP téléchargé reproduit la structure d'assets du site original. Voici un exemple typique :",
+        outputP2:'Les chemins sont réécrits pour que les fichiers HTML référencent les assets locaux — vous pouvez ouvrir <code>index.html</code> directement dans un navigateur pour la plupart des sites statiques.',
+        outputCallout:'Les fichiers ZIP sont stockés sur nos serveurs pendant <strong>2 heures</strong> après leur création, puis définitivement supprimés. Téléchargez votre fichier rapidement.',
+        limitsTitle:'Limites d\'utilisation',
+        limitsP1:'Pour garantir un service équitable et stable, ScrapLink applique la limite suivante :',
+        limitsLi1:'<strong>10 scrapes par jour</strong> par adresse IP',
+        limitsLi2:'Le compteur se réinitialise chaque jour à <strong>minuit UTC</strong>',
+        limitsLi3:'La limite est appliquée côté serveur et ne peut pas être contournée',
+        limitsCallout:'Si vous atteignez la limite journalière, vous recevrez un message d\'erreur clair. Réessayez simplement le lendemain après minuit UTC.',
+        blockedTitle:'Domaines bloqués',
+        blockedP1:'Certains domaines sont définitivement bloqués. Tout URL contenant le mot-clé <code>xhrishost</code> (y compris <code>xhrishost.site</code>) est bloqué — ces domaines appartiennent au propriétaire du service.',
+        blockedP2:'Tenter de scraper un domaine bloqué entraîne une erreur immédiate, côté client et serveur.',
+        blockedCallout:"Au-delà de la liste de blocage explicite, vous êtes responsable de vous assurer que votre utilisation de ScrapLink respecte le <code>robots.txt</code> du site cible, ses conditions d'utilisation, et les lois applicables.",
+        tipsTitle:'Astuces',
+        tipsT1:'Choisissez le bon mode',
+        tipsP1:'Commencez par le <strong>mode Rapide</strong>. Si le résultat est vide ou incomplet, passez au <strong>mode Complet</strong>. Le mode Complet est toujours plus complet mais plus lent.',
+        tipsT2:'Applications Next.js et React',
+        tipsP2:'Utilisez toujours le mode Complet (Playwright) pour Next.js, React, Vue ou tout SPA. Le mode Rapide ne capturera que le HTML vide sans aucun contenu rendu.',
+        tipsT3:'Sites volumineux',
+        tipsP3:'Pour les grands sites avec des centaines de pages, le scraping peut prendre plusieurs minutes. Suivez le terminal de logs pour voir quelles pages sont traitées.',
+        tipsT4:'Ouvrir votre ZIP en local',
+        tipsP4:'Décompressez l\'archive et ouvrez <code>index.html</code> dans votre navigateur. Pour les sites utilisant des chemins absolus, utilisez un serveur local comme <code>npx serve .</code> dans le dossier décompressé.',
+        tipsFinalCallout:'Encore des questions ? Consultez notre <a href="/faq.html">FAQ</a> ou <a href="/">commencez à scraper</a> maintenant.',
+        footerAbout:'À propos', footerContact:'Contact', footerTerms:"Conditions d'utilisation",
+        footerPrivacy:'Politique de confidentialité', footerRights:'Tous droits réservés.',
+      },
+    };
+
+    let lang = localStorage.getItem('lang') || 'en';
+    const langBtn = document.getElementById('langBtn');
+
+    function applyLang() {
+      const d = T[lang];
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const v = d[el.getAttribute('data-i18n')];
+        if (v !== undefined) el.innerHTML = v;
+      });
+      langBtn.textContent = lang === 'en' ? 'FR' : 'EN';
+      document.documentElement.lang = lang;
+    }
+
+    langBtn.addEventListener('click', () => {
+      lang = lang === 'en' ? 'fr' : 'en';
+      localStorage.setItem('lang', lang);
+      applyLang();
+    });
+
+    // Sidebar active link on scroll
+    const sections = document.querySelectorAll('.docs-section');
+    const sideLinks = document.querySelectorAll('.sidebar-nav a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 100) current = s.id;
+      });
+      sideLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }, { passive: true });
+
+    applyLang();
+  </script>
+</body>
+</html>
