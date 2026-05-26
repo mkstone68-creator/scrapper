@@ -136,7 +136,7 @@ const TRANSLATIONS = {
   },
 };
 
-const BLOCKED_DOMAINS = ['xhrishost'];
+const BLOCKED_DOMAINS = ['xhrishost', 'xhris-scrapper.up.railway.app'];
 
 // English is the default language
 let currentLang = localStorage.getItem('lang') || 'en';
